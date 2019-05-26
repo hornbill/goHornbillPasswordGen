@@ -55,39 +55,39 @@ func (pwdProfile *PasswordProfileStruct) GenPassword() (string, error) {
 	}
 
 	//process lower chars
-	if pwdProfile.UseLower || pwdProfile.ForceLower > 0 {
+	if pwdProfile.UseLower {
 		allChars += lcs
-		for i := 0; i < pwdProfile.ForceLower; i++ {
-			character := getRune(lcs)
-			passwordChars = append(passwordChars, character)
-		}
+	}
+	for i := 0; i < pwdProfile.ForceLower; i++ {
+		character := getRune(lcs)
+		passwordChars = append(passwordChars, character)
 	}
 
 	//process upper chars
-	if pwdProfile.UseUpper || pwdProfile.ForceUpper > 0 {
+	if pwdProfile.UseUpper {
 		allChars += ucs
-		for i := 0; i < pwdProfile.ForceUpper; i++ {
-			character := getRune(ucs)
-			passwordChars = append(passwordChars, character)
-		}
+	}
+	for i := 0; i < pwdProfile.ForceUpper; i++ {
+		character := getRune(ucs)
+		passwordChars = append(passwordChars, character)
 	}
 
 	//process number chars
-	if pwdProfile.UseNumeric || pwdProfile.ForceNumeric > 0 {
+	if pwdProfile.UseNumeric {
 		allChars += num
-		for i := 0; i < pwdProfile.ForceNumeric; i++ {
-			character := getRune(num)
-			passwordChars = append(passwordChars, character)
-		}
+	}
+	for i := 0; i < pwdProfile.ForceNumeric; i++ {
+		character := getRune(num)
+		passwordChars = append(passwordChars, character)
 	}
 
 	//process special chars
-	if pwdProfile.UseSpecial || pwdProfile.ForceSpecial > 0 {
+	if pwdProfile.UseSpecial {
 		allChars += spc
-		for i := 0; i < pwdProfile.ForceSpecial; i++ {
-			character := getRune(spc)
-			passwordChars = append(passwordChars, character)
-		}
+	}
+	for i := 0; i < pwdProfile.ForceSpecial; i++ {
+		character := getRune(spc)
+		passwordChars = append(passwordChars, character)
 	}
 
 	//Generate rest of password

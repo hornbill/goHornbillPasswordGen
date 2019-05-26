@@ -64,3 +64,4 @@ func main() {
 * If sum of ForceXXX values are greater than Length value, an error will be returned.
 * If sum of ForceXXX values are less than Length Value, the additional characters are randomly generated from all character sets specified in the UseXXX bools.
 * If no ForceXXX values are > 0, then all characters are randomly generated from all character sets specified in the UseXXX bools.
+* If UseXXX bool is set to true, and corresponding ForceXXX value is > 0, then ONLY the ForceXXX number of characters from the relevant set will be used - no more of that type of character will be used to build the rest of the string (if applicable)  
