@@ -4,7 +4,6 @@ import (
 	crand "crypto/rand"
 	"encoding/binary"
 	"errors"
-	"log"
 	"math/rand"
 	"unicode/utf8"
 )
@@ -122,7 +121,7 @@ func (s cryptoSource) Int63() int64 {
 func (s cryptoSource) Uint64() (v uint64) {
 	err := binary.Read(crand.Reader, binary.BigEndian, &v)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return v
 }
