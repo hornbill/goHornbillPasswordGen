@@ -1,10 +1,13 @@
-package hornbillPasswordGen
+package hornbillpasswordgen
+
+//version "1.1.0"
 
 import (
 	crand "crypto/rand"
 	"encoding/binary"
 	"errors"
 	"math/rand"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -12,19 +15,20 @@ type cryptoSource struct{}
 
 //PasswordProfileStruct is the struct that contains the profile details used when generating a new Password
 type PasswordProfileStruct struct {
-	Length       int
-	UseLower     bool
-	ForceLower   int
-	UseUpper     bool
-	ForceUpper   int
-	UseNumeric   bool
-	ForceNumeric int
-	UseSpecial   bool
-	ForceSpecial int
+	Length         int
+	UseLower       bool
+	ForceLower     int
+	UseUpper       bool
+	ForceUpper     int
+	UseNumeric     bool
+	ForceNumeric   int
+	UseSpecial     bool
+	ForceSpecial   int
+	Blacklist      []string
+	MustNotContain []string
 }
 
 const (
-	version = "1.0.0"
 	//Define character sets
 	lcs = "abcdefghijklmnopqrstuvwxyz"
 	ucs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -43,14 +47,20 @@ func NewPasswordInstance() *PasswordProfileStruct {
 	return npwd
 }
 
-//GenPassword - generates a password against the previously set Profile
+//GenPassword - generates and returns a password
 func (pwdProfile *PasswordProfileStruct) GenPassword() (string, error) {
+	newPass, err := newPassword(*pwdProfile)
+	return newPass, err
+}
+
+//newPassword - generates a password against the previously set Profile
+func newPassword(pwdProfile PasswordProfileStruct) (string, error) {
 	var passwordChars []string
 	var password string
 	var allChars string
 
 	if (pwdProfile.ForceLower + pwdProfile.ForceUpper + pwdProfile.ForceNumeric + pwdProfile.ForceSpecial) > pwdProfile.Length {
-		return "", errors.New("Sum of forced Profile values is greater than total password Length requested")
+		return "", errors.New("sum of forced profile values is greater than total password length requested")
 	}
 
 	//process lower chars
@@ -108,6 +118,21 @@ func (pwdProfile *PasswordProfileStruct) GenPassword() (string, error) {
 		password += passwordChars[i]
 	}
 
+	//Check generated password isn't in blacklist
+	if len(pwdProfile.Blacklist) > 0 {
+		if isBlk := checkBlacklist(pwdProfile.Blacklist, password); isBlk {
+			password, err := newPassword(pwdProfile)
+			return password, err
+		}
+	}
+
+	//Check generated password doesn't contain any of the strings provided in the MustNotContain array
+	if len(pwdProfile.MustNotContain) > 0 {
+		if containsStr := checkContain(pwdProfile.MustNotContain, password); containsStr {
+			password, err := newPassword(pwdProfile)
+			return password, err
+		}
+	}
 	return password, nil
 }
 
@@ -133,4 +158,28 @@ func getRune(sourceChars string) string {
 	charPosition := rnd.Intn(utf8.RuneCountInString(sourceChars))
 	runesArray := []rune(sourceChars)
 	return string(runesArray[charPosition])
+}
+
+//checkBlacklist - checks string against set blacklist array
+func checkBlacklist(blacklist []string, password string) bool {
+	pwBlacklisted := false
+	for _, v := range blacklist {
+		if strings.EqualFold(password, v) {
+			pwBlacklisted = true
+			break
+		}
+	}
+	return pwBlacklisted
+}
+
+//checkMustNotContain - checks string against restricted use strings - useful for checking personal information
+func checkContain(blacklist []string, password string) bool {
+	pwContainsRestricted := false
+	for _, v := range blacklist {
+		if len(v) > 2 && strings.Contains(strings.ToLower(password), strings.ToLower(v)) {
+			pwContainsRestricted = true
+			break
+		}
+	}
+	return pwContainsRestricted
 }
