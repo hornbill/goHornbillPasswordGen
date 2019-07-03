@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.2.0
+
+### Features
+
+* Added debug mode, to output detailed information regarding password generation process
+
 ## v1.1.0
 
 ### Features

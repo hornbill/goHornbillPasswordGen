@@ -1,12 +1,13 @@
 package hornbillpasswordgen
 
-//version "1.1.0"
+//version "1.2.0"
 
 import (
 	crand "crypto/rand"
 	"encoding/binary"
 	"errors"
 	"math/rand"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -38,7 +39,9 @@ const (
 
 var (
 	//Profile - defines the password Profile
-	Profile PasswordProfileStruct
+	Profile   PasswordProfileStruct
+	debugMode bool
+	debugging []string
 )
 
 //NewPasswordInstance - creates a new password generator instance
@@ -47,14 +50,29 @@ func NewPasswordInstance() *PasswordProfileStruct {
 	return npwd
 }
 
+//SetDebug - switches on debug mode, returning debugging information as an array of strings when calling GenPassword
+func (pwdProfile *PasswordProfileStruct) SetDebug() {
+	debugMode = true
+	debugging = append(debugging, "Debugging Switched ON")
+}
+
 //GenPassword - generates and returns a password
-func (pwdProfile *PasswordProfileStruct) GenPassword() (string, error) {
+func (pwdProfile *PasswordProfileStruct) GenPassword() (string, []string, error) {
+	debug("GenPassword function call")
 	newPass, err := newPassword(*pwdProfile)
-	return newPass, err
+	return newPass, debugging, err
+}
+
+//debug - append debugging array if debugMode switched on
+func debug(outputString string) {
+	if debugMode {
+		debugging = append(debugging, outputString)
+	}
 }
 
 //newPassword - generates a password against the previously set Profile
 func newPassword(pwdProfile PasswordProfileStruct) (string, error) {
+	debug("newPassword function call")
 	var passwordChars []string
 	var password string
 	var allChars string
@@ -65,6 +83,7 @@ func newPassword(pwdProfile PasswordProfileStruct) (string, error) {
 
 	//process lower chars
 	if pwdProfile.UseLower {
+		debug("UseLower TRUE")
 		allChars += lcs
 	}
 	for i := 0; i < pwdProfile.ForceLower; i++ {
@@ -74,6 +93,7 @@ func newPassword(pwdProfile PasswordProfileStruct) (string, error) {
 
 	//process upper chars
 	if pwdProfile.UseUpper {
+		debug("UseUpper TRUE")
 		allChars += ucs
 	}
 	for i := 0; i < pwdProfile.ForceUpper; i++ {
@@ -83,6 +103,7 @@ func newPassword(pwdProfile PasswordProfileStruct) (string, error) {
 
 	//process number chars
 	if pwdProfile.UseNumeric {
+		debug("UseNumeric TRUE")
 		allChars += num
 	}
 	for i := 0; i < pwdProfile.ForceNumeric; i++ {
@@ -92,6 +113,7 @@ func newPassword(pwdProfile PasswordProfileStruct) (string, error) {
 
 	//process special chars
 	if pwdProfile.UseSpecial {
+		debug("UseSpecial TRUE")
 		allChars += spc
 	}
 	for i := 0; i < pwdProfile.ForceSpecial; i++ {
@@ -118,21 +140,36 @@ func newPassword(pwdProfile PasswordProfileStruct) (string, error) {
 		password += passwordChars[i]
 	}
 
+	debug("allChars: " + allChars)
+	debug("passwordChars: " + strings.Join(passwordChars, ""))
+	debug("password: " + password)
+
 	//Check generated password isn't in blacklist
 	if len(pwdProfile.Blacklist) > 0 {
+		debug("Blacklist Length: " + strconv.Itoa(len(pwdProfile.Blacklist)))
 		if isBlk := checkBlacklist(pwdProfile.Blacklist, password); isBlk {
+			debug("[BLACKLIST] Generated password in blacklist: " + password)
 			password, err := newPassword(pwdProfile)
+			debug("[BLACKLIST] New Password: " + password)
+			debug("[BLACKLIST] Error: " + err.Error())
 			return password, err
 		}
+		debug("Password not found in Blacklist")
 	}
 
 	//Check generated password doesn't contain any of the strings provided in the MustNotContain array
 	if len(pwdProfile.MustNotContain) > 0 {
+		debug("MustNotContain Length: " + strconv.Itoa(len(pwdProfile.MustNotContain)))
 		if containsStr := checkContain(pwdProfile.MustNotContain, password); containsStr {
+			debug("[MUSTNOTCONTAIN] Generated password contains restricted string: " + password)
 			password, err := newPassword(pwdProfile)
+			debug("[MUSTNOTCONTAIN] New Password: " + password)
+			debug("[MUSTNOTCONTAIN] Error: " + err.Error())
 			return password, err
 		}
+		debug("Password does not contain restricted strings")
 	}
+	debug("Returning Password: " + password)
 	return password, nil
 }
 

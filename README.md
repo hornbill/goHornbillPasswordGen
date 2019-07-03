@@ -20,6 +20,10 @@ Creates a new Password Profile instance. The following optional variables can be
 * Blacklist			[]string
 * MustNotContain	[]string
 
+## SetDebug()
+
+Enables debug mode - debugging strings output in an array when calling GenPassword. Should be called directly after running NewPasswordInstance().
+
 ## GenPassword()
 
 Generates password as per Profile.
@@ -38,7 +42,7 @@ import (
 func main() {
 	//Create new Password Generator instance
 	pwdinst := hornbillPasswordGen.NewPasswordInstance()
-
+	pwdinst.SetDebug()
 	//Define the password profile
 	pwdinst.Length = 10                                             //Password Length
 	pwdinst.UseLower = true                                         //Use lower case a-z characters in the password
@@ -55,7 +59,7 @@ func main() {
 	pwdinst.MustNotContain = append(pwdinst.MustNotContain, "name") //Strings that the new password must not contain - case insensitive - mandatory string length >= 3 characters
 
 	//Generate a new password
-	newPassword, err := pwdinst.GenPassword()
+	newPassword, _, err := pwdinst.GenPassword()
 	if err != nil {
 		fmt.Println(fmt.Sprintf("%v", err))
 		return
