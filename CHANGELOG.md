@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.2.1
+
+### Features
+
+* Added default string length of 16 when 0 length strings are requested
+
 ## v1.2.0
 
 ### Features

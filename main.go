@@ -1,6 +1,6 @@
 package hornbillpasswordgen
 
-//version "1.2.0"
+//version "1.2.1"
 
 import (
 	crand "crypto/rand"
@@ -31,10 +31,11 @@ type PasswordProfileStruct struct {
 
 const (
 	//Define character sets
-	lcs = "abcdefghijklmnopqrstuvwxyz"
-	ucs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	num = "0123456789"
-	spc = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+	lcs                 = "abcdefghijklmnopqrstuvwxyz"
+	ucs                 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	num                 = "0123456789"
+	spc                 = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+	defaultStringLength = 16
 )
 
 var (
@@ -53,6 +54,7 @@ func NewPasswordInstance() *PasswordProfileStruct {
 //SetDebug - switches on debug mode, returning debugging information as an array of strings when calling GenPassword
 func (pwdProfile *PasswordProfileStruct) SetDebug() {
 	debugMode = true
+	debugging = nil
 	debugging = append(debugging, "Debugging Switched ON")
 }
 
@@ -76,6 +78,9 @@ func newPassword(pwdProfile PasswordProfileStruct) (string, error) {
 	var passwordChars []string
 	var password string
 	var allChars string
+	if pwdProfile.Length == 0 {
+		pwdProfile.Length = defaultStringLength
+	}
 
 	if (pwdProfile.ForceLower + pwdProfile.ForceUpper + pwdProfile.ForceNumeric + pwdProfile.ForceSpecial) > pwdProfile.Length {
 		return "", errors.New("sum of forced profile values is greater than total password length requested")
